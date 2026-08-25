@@ -1,0 +1,44 @@
+name: checks
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+# Read-only, and deliberately `pull_request` rather than `pull_request_target`:
+# the latter would run a fork's code with a write token and this repository's
+# secrets. Nothing here needs either.
+permissions:
+  contents: read
+
+concurrency:
+  group: checks-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  hooks:
+    name: hooks on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      # Both legs always report. A failure on one platform is the finding.
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@v7
+      # Eight scenarios plus CASE 9, in throwaway repositories with a throwaway
+      # home directory. Needs no git identity and touches nothing outside them.
+      - run: bash hooks/test.sh
+
+  manifest:
+    name: plugin manifest
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      # Unpinned on purpose: the manifest gets checked against the CLI people
+      # actually run, so a schema change surfaces here instead of in an issue.
+      - run: npm install -g @anthropic-ai/claude-code
+      - run: claude plugin validate .

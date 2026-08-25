@@ -28,6 +28,11 @@ touches nothing of yours. Run one by hand instead and remember that both read
 from standard input: add `</dev/null` or they sit there waiting for a payload
 that never comes.
 
+Both of those run on every pull request, the hook suite on Linux and macOS
+both, so a shell construct that only works on one of them shows up as a failed
+check rather than in somebody's terminal. Nothing else is automatic: the
+`references/` examples and the wording of a `SKILL.md` still need a person.
+
 The formula that decides whether real work happened lives in
 `hooks/fingerprint.sh`, shared by both hooks on purpose. Change it in one place
 only, and run the checks: two hooks computing it differently would ask for a
