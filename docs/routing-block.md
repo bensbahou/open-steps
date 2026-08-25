@@ -1,0 +1,18 @@
+## These moments require a skill - not optional
+
+Invoke the skill. Do not improvise the answer in its place.
+
+| Moment | Skill |
+|---|---|
+| I ask what is next, what is left, or what is blocked | `os-whats-next` |
+| **Any technical question you put to me, or any options you offer** | `os-ask-simple` |
+| **Any message where you ask me to do something** - run a command, paste a value, approve, choose, test on a device | `os-step-by-step` |
+| I ask about other sessions, or to accept work one of them finished | `os-check-work` |
+| Work is finished, or I ask how it went | `os-done-or-not` |
+| I say I did not understand, ask for simpler or shorter, or paste text asking what it means | `os-say-simple` |
+
+Never offer me options without naming a recommendation, and never recommend
+something you have not screened for future cost.
+
+Reports live in `~/.claude/open-steps/reports/<project>/`. Read `latest.md`
+before re-exploring a repository you have worked in before.
