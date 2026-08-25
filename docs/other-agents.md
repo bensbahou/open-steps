@@ -35,8 +35,8 @@ folder is the one that was run.
 ## The routing block
 
 The block in [`routing-block.md`](routing-block.md) does the same job here as
-in `CLAUDE.md`: it turns six moments into an obligation rather than a hint.
-Skills are model-invoked everywhere, so this matters everywhere.
+in `CLAUDE.md`: it turns the moments it names into an obligation rather than a
+hint. Skills are model-invoked everywhere, so this matters everywhere.
 
 One command per tool, from the folder holding the clone, safe to re-run:
 
