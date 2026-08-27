@@ -33,6 +33,17 @@ both, so a shell construct that only works on one of them shows up as a failed
 check rather than in somebody's terminal. Nothing else is automatic: the
 `references/` examples and the wording of a `SKILL.md` still need a person.
 
+**Sign off your commits.** Use `git commit -s`, which adds a `Signed-off-by`
+line. It is how you state that you wrote the change, or otherwise have the right
+to release it under this repository's licence, and a check on every pull request
+requires it. To add it to commits you already made:
+`git rebase --signoff origin/main`.
+
+That matters most for an example: it must be synthetic, or from work where you
+hold every right. Not client material and not a redacted real report, because
+redaction still leaks context. Say in the pull request that it contains neither
+confidential nor third-party data.
+
 The formula that decides whether real work happened lives in
 `hooks/fingerprint.sh`, shared by both hooks on purpose. Change it in one place
 only, and run the checks: two hooks computing it differently would ask for a
