@@ -21,7 +21,7 @@ body:
   - type: checkboxes
     id: rights
     attributes:
-      label: ""
+      label: Before you send
       options:
         - label: Nothing here is confidential or a client's
           required: true
