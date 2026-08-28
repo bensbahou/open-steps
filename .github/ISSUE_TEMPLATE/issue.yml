@@ -1,0 +1,27 @@
+name: Open an issue
+description: A problem, an idea, or something the pack got wrong
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What is the problem
+      description: >
+        Plain words. If you have a fix or an idea in mind, say that too, but the
+        problem on its own is enough. A new skill is welcome as an idea and has
+        to be agreed in words before anyone writes it.
+    validations:
+      required: true
+  - type: textarea
+    id: paste
+    attributes:
+      label: Anything worth pasting
+      description: >
+        Optional. What your agent actually said, an error, a command that failed.
+      render: text
+  - type: checkboxes
+    id: rights
+    attributes:
+      label: ""
+      options:
+        - label: Nothing here is confidential or a client's
+          required: true
