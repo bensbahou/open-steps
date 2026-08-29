@@ -150,6 +150,7 @@ read: [`docs/other-agents.md`](docs/other-agents.md).
 | [`os-done-or-not`](skills/os-done-or-not/) | A one-screen report with a verdict: done or not, anything needed from you, any new debt, safe to close | Work wraps up, or you ask how it went |
 | [`os-step-by-step`](skills/os-step-by-step/) | Numbered steps a non-technical person can follow. The agent must first try everything itself and ask only for what truly needs you | The agent needs you to run, paste, click, approve or test something |
 | [`os-ask-simple`](skills/os-ask-simple/) | The question in plain words, what it costs later, and one marked recommendation | The agent has a question or options for you |
+| [`os-what-could-go-wrong`](skills/os-what-could-go-wrong/) | Assumes the decision already failed and works backwards to find out why, in a fresh agent that had no hand in it. Ends on one verdict | Something hard to undo is about to be agreed - a contract, a purchase, a migration, a launch |
 | [`os-whats-next`](skills/os-whats-next/) | Merges what is verified and ready, then recommends the next task and says why in plain words | You ask what is left or what to do next |
 | [`os-check-work`](skills/os-check-work/) | Does not trust another session's report. Checks every claim against what actually happened, then says what to do about it | Another session says it is done |
 | [`os-say-simple`](skills/os-say-simple/) | Rewrites any text in plain words without losing facts or bad news. Give it a number and you get exactly that many points | Any text reads like engineering: a report, a comment, an error, the agent's own answer |
@@ -157,47 +158,61 @@ read: [`docs/other-agents.md`](docs/other-agents.md).
 They work as a loop: `os-whats-next` picks the work, `os-step-by-step` walks
 you through your part, `os-done-or-not` reports the result, `os-check-work`
 accepts what other sessions did, `os-ask-simple` handles the questions on the
-way, and `os-say-simple` rescues any text that still reads like engineering.
+way, `os-what-could-go-wrong` attacks anything hard to undo before it is
+agreed, and `os-say-simple` rescues any text that still reads like
+engineering.
 
 ## Numbers
 
 The pack tells the agent to separate what it measured from what it assumed.
 Same rule for me.
 
-Eighteen phrases a person would actually say, three of them per skill, each
-asked three times, headless, in a working installation, on three Claude
-models. The question every time: did the right skill switch on by itself?
-Three off-topic questions, each also asked three times, checked the opposite.
+Twenty-one phrases a person would actually say, three per skill, each asked
+three times, headless, in a working installation, on three Claude models. The
+question every time: did the right skill switch on by itself? Three off-topic
+questions, each also asked three times, checked the opposite. Remeasured in
+full on 2026-08-29, the day the seventh skill landed.
 
 ![Activation per skill on Haiku 4.5, Sonnet 5 and Opus 5](assets/activation.svg)
 
 | Skill | Haiku 4.5 | Sonnet 5 | Opus 5 |
 |---|---|---|---|
 | `os-check-work` | 9/9 | 9/9 | 9/9 |
-| `os-done-or-not` | 9/9 | 9/9 | 9/9 |
 | `os-whats-next` | 9/9 | 9/9 | 9/9 |
-| `os-ask-simple` | 8/9 | 7/9 | 9/9 |
-| `os-say-simple` | 5/9 | 9/9 | 9/9 |
-| `os-step-by-step` | 3/9 | 9/9 | 9/9 |
-| **All 18 phrases** | **79%** | **96%** | **100%** |
+| `os-what-could-go-wrong` | 9/9 | 9/9 | 9/9 |
+| `os-ask-simple` | 9/9 | 8/9 | 9/9 |
+| `os-done-or-not` | 9/9 | 7/9 | 9/9 |
+| `os-say-simple` | 6/9 | 9/9 | 9/9 |
+| `os-step-by-step` | 4/9 | 9/9 | 9/9 |
+| **All 21 phrases** | **87%** | **95%** | **100%** |
 | Fired on an off-topic question | 1/9 | 0/9 | 0/9 |
 
 The honest reading, because the misses matter more than the score.
 
-- On Sonnet 5 and Opus 5 this works. Three skills are perfect on every model.
+- On Sonnet 5 and Opus 5 this works. Three skills are perfect on every model,
+  and Opus missed nothing at all.
+- `os-what-could-go-wrong` was named the skill most likely to steal a phrase
+  from `os-ask-simple`, so that was measured before it merged: 27/27 on its
+  own phrases, `os-ask-simple` did not drop, and off-topic questions still
+  leave it silent. The fear did not survive the measurement.
+- Sonnet 5 dropped two runs of the vaguest phrase ("That's it for today. What
+  happened?") to no skill at all, not to the new one. Asked six more times
+  the same way, it fired six of six. Read the 7/9 as the same run-to-run
+  wobble Haiku shows below; it stays in the table because that is what the
+  pass measured.
 - On Haiku 4.5, two skills are unreliable and one off-topic question wrongly
   pulled in a skill. If you run on the cheapest model, expect to type the
   skill name yourself sometimes.
-- Haiku also moves between runs. An earlier sweep of the same phrases put
-  `os-step-by-step` at 50% where this one puts it at 33%, and put false fires
-  at zero. Three runs per phrase is a smoke test, not a benchmark, and small
-  numbers wobble. I would rather say that than quote the friendlier sweep.
+- Haiku also moves between runs. Three sweeps of the same phrases have put
+  `os-step-by-step` at 50%, 33% and now 44%, and false fires at zero and one.
+  Three runs per phrase is a smoke test, not a benchmark, and small numbers
+  wobble. I would rather say that than quote the friendliest sweep.
 - Where Haiku misses, it usually asks a clarifying question first: told "put
   a secret on the server, tell me what to do", it wants to know which server
   and which secret. That is the pack's own earn-the-ask rule; a one-shot test
   scores it as a miss.
-- The test set is mine, and it is small. Eighteen phrases in a repository you
-  can read, so write better ones and re-run it.
+- The test set is mine, and it is small. Twenty-one phrases in a repository
+  you can read, so write better ones and re-run it.
 
 Two things earlier rounds cost me, kept here because they are the useful part.
 A negation inside a description ("this is NOT the skill for X") is ignored, so
@@ -216,7 +231,9 @@ another model.
 
 Also measured, and easy to check yourself: the skill descriptions cost **770
 tokens per session**, always on, which Claude Code reports itself with
-`claude plugin details open-steps`. The session-start hook adds its injection
+`claude plugin details open-steps`. That figure was taken before
+`os-what-could-go-wrong` was added and has not been retaken; run the command
+for the current one. The session-start hook adds its injection
 on top, capped by `OPEN_STEPS_MAX_REPORT_LINES`. Installing works from a
 clean empty account, with both hooks connected. `claude plugin validate
 --strict` passes.
@@ -293,7 +310,9 @@ they survive uninstalling the pack.
 And the honest limits. Not every skill has a worked example yet.
 `os-whats-next` and `os-check-work` read project state through `git` and `gh`;
 without those tools, more of the output says "not checked". The writing style
-does not reach subagents.
+does not reach subagents; `os-what-could-go-wrong`, the only skill that
+dispatches one, carries its rules inside the handover instead, so its plain
+language rests on `references/premortem-prompt.md` alone.
 
 ## Open source
 
