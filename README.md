@@ -106,9 +106,13 @@ grep -q 'os-done-or-not' ~/.claude/CLAUDE.md 2>/dev/null || cat open-steps/docs/
 
 The reasoning is in [`docs/claude-md.md`](docs/claude-md.md).
 
-To update: `claude plugin update open-steps`. To remove:
-`claude plugin uninstall open-steps`, then take the block back out of your
-`CLAUDE.md`.
+To update: `git pull` inside `open-steps/`, then
+`claude plugin update open-steps@open-steps`. Both halves matter: the plugin
+updates from your clone, not from GitHub, so without the pull "already at the
+latest version" is true of the folder and wrong about this repository. And
+`update` wants the full plugin@marketplace name, where `uninstall` accepts the
+short one. To remove: `claude plugin uninstall open-steps`, then take the
+block back out of your `CLAUDE.md`.
 
 The one piece that stays manual is the writing style, because turning it on
 would silently replace whatever style you already chose. Two lines, in
