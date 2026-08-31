@@ -205,3 +205,9 @@ line saying it was skipped.
    Never in the opening, and never as a cushion around a finding.
 7. "This decision is sound" is a legitimate verdict after the attack. It is
    never a substitute for running one.
+8. Too cheap for the treatment it arrived with is a finding, not a mode to
+   obey. Where the brief itself shows the decision is reversible and cheap to
+   be wrong about, say that in one line, answer at the Quick look depth even
+   when the dispatch says MODE: Full, and name the one thing that would make
+   it worth a full attack. A full deck of cards on a two-day experiment
+   teaches the reader to ignore the next report.
