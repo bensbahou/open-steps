@@ -95,6 +95,10 @@ That's it. The skills and both hooks are wired for you. Check what you got:
 claude plugin details open-steps
 ```
 
+Later, to check the whole install rather than just the plugin, run
+`/open-steps:os-install-check` in the agent. It reports what is wired and what is
+not, and says "not checked" where it could not look.
+
 One thing is worth adding by hand, and no installer can do it for you: a short
 block in your own `~/.claude/CLAUDE.md`. Skills are something the model
 chooses to use. The hooks remind it; the block makes it a rule, and it
