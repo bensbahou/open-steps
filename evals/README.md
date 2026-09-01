@@ -1,12 +1,16 @@
 # Measurements
 
-Real numbers or nothing. Five files: what we ask, what came back, and the two
-scripts in between.
+Real numbers or nothing. Six files: what we ask, who we ask, what came back,
+and the two scripts in between.
 
 - **[`cases.md`](cases.md) is everything we ask.** The phrases that should
   switch a skill on, the off-topic phrases that must switch nothing on, and the
   messy engineer report we use for the quality check. `run.sh` reads this file.
   Change a phrase here and the next run uses it.
+- **[`models.md`](models.md) is who we ask.** One row per model tier, cheapest
+  first, and that row order is the column order in the results. A new tier is
+  one row here, no code. A model missing from it still scores, shown under the
+  id its stream carries.
 - **[`results.md`](results.md) is what came back.** Every skill and every
   phrase, one model next to another. The scorer writes this file and nobody
   types it, which is how you can check the numbers in the main README.

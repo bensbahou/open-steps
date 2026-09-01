@@ -15,17 +15,16 @@ import json, pathlib, re, sys, collections
 
 HERE = pathlib.Path(__file__).resolve().parent
 CASES = HERE / "cases.md"
+MODELS = HERE / "models.md"
 HASH = re.compile(r"\b[0-9a-f]{7,40}\b")
 JARGON = re.compile(r"\b(p95|TTL|JWT|middleware|lockfile|CVE|e2e|env drift|CDN)\b", re.I)
-SHORT = {"claude-haiku-4-5-20251001": "Haiku 4.5"}
-ORDER = ["haiku", "sonnet", "opus"]  # cheapest first, the way the table reads
 MARKERS = ("-act-", "-neg-", "-qual-")
 
 
-def table(section):
-    """The data rows of one markdown table in cases.md, as lists of cells."""
+def table(section, path=CASES):
+    """The data rows of one markdown table in a file, as lists of cells."""
     rows, insec, seen = [], False, 0
-    for line in CASES.read_text().splitlines():
+    for line in path.read_text().splitlines():
         if line.startswith("## "):
             insec, seen = line == "## " + section, 0
             continue
@@ -75,17 +74,24 @@ def quality(path):
     }
 
 
+# The tiers live in models.md, one row per tier, cheapest first. Row order is
+# the column order. A missing file means an empty registry, and every model
+# then shows under the id its stream carries, which is honest rather than fatal.
+TIERS = [r for r in table("Tiers", MODELS)] if MODELS.exists() else []
+
+
 def label(model):
-    if model in SHORT:
-        return SHORT[model]
-    return model.replace("claude-", "").replace("-", " ").title()
+    for match, shown in TIERS:
+        if match in model:
+            return shown
+    return model
 
 
 def rank(model):
-    for i, name in enumerate(ORDER):
-        if name in model:
+    for i, (match, _) in enumerate(TIERS):
+        if match in model:
             return (i, model)
-    return (len(ORDER), model)
+    return (len(TIERS), model)
 
 
 def read_day(folder):
