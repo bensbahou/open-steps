@@ -16,6 +16,9 @@ import json, pathlib, re, sys, collections
 HERE = pathlib.Path(__file__).resolve().parent
 CASES = HERE / "cases.md"
 MODELS = HERE / "models.md"
+README = HERE.parent / "README.md"
+MARK_A = "<!-- numbers: score.py writes this table, edit the prose but not these rows -->"
+MARK_B = "<!-- numbers: end -->"
 HASH = re.compile(r"\b[0-9a-f]{7,40}\b")
 JARGON = re.compile(r"\b(p95|TTL|JWT|middleware|lockfile|CVE|e2e|env drift|CDN)\b", re.I)
 MARKERS = ("-act-", "-neg-", "-qual-")
@@ -165,6 +168,54 @@ def ordered_skills(runs):
     return [s for s in order if s in tested] + sorted(tested - seen)
 
 
+def readme_table(runs):
+    """The summary table the main README shows. Best skill first and the
+    misses last, because the prose under it reads the misses as the important
+    part. Ties are broken by the order cases.md tests the skills, so the sort
+    is a stated rule, not an accident of the run."""
+    models = sorted(runs, key=rank)
+    cols = [runs[m] for m in models]
+    head = " | ".join(label(m) for m in models)
+    order = ordered_skills(runs)
+
+    def hits(s):
+        return sum(r["skill"].get(s, [0, 0, 0])[0] for r in cols)
+
+    out = [f"| Skill | {head} |", "|" + "---|" * (len(cols) + 1)]
+    for s in sorted(order, key=lambda s: (-hits(s), order.index(s))):
+        cells = " | ".join(f"{r['skill'].get(s, [0, 0, 0])[0]}/{r['skill'].get(s, [0, 0, 0])[1]}" for r in cols)
+        out.append(f"| `{s}` | {cells} |")
+    phrases = len({i for r in cols for i in r["phrase"]})
+    tot = []
+    for r in cols:
+        h = sum(v[0] for v in r["skill"].values())
+        n = sum(v[1] for v in r["skill"].values())
+        tot.append(f"**{100 * h // max(n, 1)}%**")
+    out.append(f"| **All {phrases} phrases** | " + " | ".join(tot) + " |")
+    out.append("| Fired on an off-topic question | "
+               + " | ".join(f"{r['neg'][0]}/{r['neg'][1]}" for r in cols) + " |")
+    return "\n".join(out)
+
+
+def update_readme(runs):
+    """Rewrite the summary table in the main README, between its two markers.
+    Only the table: the prose and the figure around it belong to a person.
+    No markers means no touch and a word about it, never a guess at where
+    the table was supposed to go."""
+    if not README.exists():
+        return "README.md not found, left alone"
+    text = README.read_text()
+    if MARK_A not in text or MARK_B not in text:
+        return "README.md has no table markers, left alone"
+    a = text.index(MARK_A) + len(MARK_A)
+    b = text.index(MARK_B)
+    new = text[:a] + "\n\n" + readme_table(runs) + "\n\n" + text[b:]
+    if new == text:
+        return "README.md already matches"
+    README.write_text(new)
+    return "wrote the summary table into README.md"
+
+
 def report(folder, runs):
     """The whole day as one page: per skill, per phrase, then the quality arms."""
     models = sorted(runs, key=rank)
@@ -228,5 +279,7 @@ text = report(folder, runs)
 if not show_only:
     out = HERE / "results.md"
     out.write_text(text)
-    print(f"wrote {out}\n")
+    print(f"wrote {out}")
+    print(update_readme(runs))
+    print()
 print(text)
