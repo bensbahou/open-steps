@@ -4,6 +4,12 @@
 # Run it from the pack root, from YOUR terminal (headless claude needs your
 # keychain for OAuth):   bash evals/run.sh
 #
+# One model by default. A whole day in one go is a list:
+#   EVAL_MODEL="haiku sonnet opus" bash evals/run.sh
+# The models run one after another, so interrupting the sweep leaves every
+# model that already finished intact, and only the one in flight is partial.
+# Re-running one model still replaces just that model's files for the day.
+#
 # What it does, in plain words:
 #   1. one tiny run to check authentication works at all
 #   2. asks each trigger phrase from cases.md 3 times in the real installed
@@ -19,7 +25,10 @@ set -u
 PACK="$(cd "$(dirname "$0")/.." && pwd)"
 CASES="$PACK/evals/cases.md"
 N_RUNS="${N_RUNS:-3}"
-MODEL="${EVAL_MODEL:-haiku}"
+# EVAL_MODEL is one model or a space-separated list. A plain string on
+# purpose, not an array: macOS ships bash 3.2, where expanding an empty
+# array under `set -u` kills the shell without a word.
+MODELS="${EVAL_MODEL:-haiku}"
 PAR="${EVAL_PARALLEL:-5}"
 # 240s cap per run. macOS ships no timeout command of its own (it usually
 # arrives with Homebrew coreutils), so fall back to gtimeout, then to no cap.
@@ -56,8 +65,9 @@ block() {
   ' "$CASES"
 }
 
+FIRST_MODEL="${MODELS%% *}"
 echo "== 1/4 auth check =="
-if ! claude -p --model "$MODEL" --max-turns 1 "say just: ok" </dev/null >/dev/null 2>&1; then
+if ! claude -p --model "$FIRST_MODEL" --max-turns 1 "say just: ok" </dev/null >/dev/null 2>&1; then
   echo "Authentication failed. Run this from your own terminal (not from an agent),"
   echo "and make sure 'claude -p \"say ok\"' works first."
   exit 1
@@ -88,7 +98,11 @@ run_one() { # $1 tag  $2 with|without  $3 prompt
   echo "done: $tag"
 }
 
-echo "== 2/4 activation ($(table 'Should fire' | wc -l | tr -d ' ') phrases x $N_RUNS runs) =="
+# One model's whole measurement: activation, negatives, quality. The loop
+# below runs it once per model in the list, one model at a time, so an
+# interrupted sweep loses only the model in flight, never a finished one.
+sweep() {
+echo "== 2/4 activation ($MODEL, $(table 'Should fire' | wc -l | tr -d ' ') phrases x $N_RUNS runs) =="
 i=0
 while IFS=$'\t' read -r skill prompt; do
   [ -z "$skill" ] && continue
@@ -102,7 +116,7 @@ $(table 'Should fire')
 EOF
 wait
 
-echo "== 3/4 negatives =="
+echo "== 3/4 negatives ($MODEL) =="
 i=0
 while IFS=$'\t' read -r prompt; do
   [ -z "$prompt" ] && continue
@@ -116,7 +130,7 @@ $(table 'Should not fire')
 EOF
 wait
 
-echo "== 4/4 quality, with vs without =="
+echo "== 4/4 quality, with vs without ($MODEL) =="
 QPROMPT="$(block Prompt)
 
 $(block Report)"
@@ -126,6 +140,11 @@ for r in $(seq 1 "$N_RUNS"); do
   while [ "$(jobs -r | wc -l)" -ge "$PAR" ]; do sleep 1; done
 done
 wait
+}
+
+for MODEL in $MODELS; do
+  sweep
+done
 
 rm -rf "$WORK"
 echo "== the day so far =="
