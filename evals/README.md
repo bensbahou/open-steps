@@ -106,6 +106,10 @@ the pass that ran last, not the one you liked best.
 
 We found all three by running it, not by reading about it.
 
+- **`fixtures/` holds hand-made streams, not measurements.** One small folder
+  per shape the scorer must handle, short enough to read. They exist to show
+  the scorer failing and then passing on a shape that bit once; nothing in
+  them was said by a model, and they never feed `results.md`.
 - `claude -p --bare` skips the login on purpose and cannot sign in.
 - Pointing the tool at an empty home folder signs it out too.
 - macOS ships an old bash, version 3.2. In that version one empty list in the

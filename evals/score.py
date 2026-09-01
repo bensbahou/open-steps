@@ -56,7 +56,10 @@ def skill_calls(path):
     for d in events(path):
         for b in (d.get("message") or {}).get("content") or []:
             if isinstance(b, dict) and b.get("type") == "tool_use" and b.get("name") == "Skill":
-                out.append((b.get("input") or {}).get("skill", ""))
+                # A plugin install invokes a skill as `open-steps:os-done-or-not`;
+                # a folder install says `os-done-or-not`. Score the name, not the
+                # prefix, or every hit through the plugin counts as a miss.
+                out.append(((b.get("input") or {}).get("skill", "")).split(":")[-1])
     return out
 
 
@@ -91,6 +94,8 @@ def rank(model):
     for i, (match, _) in enumerate(TIERS):
         if match in model:
             return (i, model)
+    # After every registry row. With no rows at all there is no cheapest to
+    # be last behind, so every model is unknown and its id decides the order.
     return (len(TIERS), model)
 
 
