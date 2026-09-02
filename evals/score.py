@@ -3,9 +3,13 @@
 
     python3 evals/score.py --print ~/.claude/open-steps/evals/2026-08-24
     python3 evals/score.py ~/.claude/open-steps/evals/2026-08-24
+    python3 evals/score.py --readme ~/.claude/open-steps/evals/2026-08-24
 
-The first prints the table, the second also writes it to evals/results.md. The
-transcripts sit outside the repository, one folder per day, holding every model
+The first prints the table, the second also writes it to evals/results.md, the
+third also rewrites the summary table in the main README, dated with the day
+it came from. That last one is a flag and not a side effect because partial
+days and foreign branches get scored all the time, and none of them belong on
+the front page by accident. The transcripts sit outside the repository, one folder per day, holding every model
 that ran that day. Which model a stream came from is read out of the stream
 itself, so a renamed file cannot mislabel a column. Activation comes from the
 tool-call log, report quality from plain string rules. The phrases come from
@@ -197,11 +201,12 @@ def readme_table(runs):
     return "\n".join(out)
 
 
-def update_readme(runs):
-    """Rewrite the summary table in the main README, between its two markers.
-    Only the table: the prose and the figure around it belong to a person.
-    No markers means no touch and a word about it, never a guess at where
-    the table was supposed to go."""
+def update_readme(folder, runs):
+    """Rewrite the summary table in the main README, between its two markers,
+    with the day it was measured on written above it, so a number can never
+    wear the prose's date. Only that block: the prose and the figure around it
+    belong to a person. No markers means no touch and a word about it, never a
+    guess at where the table was supposed to go."""
     if not README.exists():
         return "README.md not found, left alone"
     text = README.read_text()
@@ -209,11 +214,12 @@ def update_readme(runs):
         return "README.md has no table markers, left alone"
     a = text.index(MARK_A) + len(MARK_A)
     b = text.index(MARK_B)
-    new = text[:a] + "\n\n" + readme_table(runs) + "\n\n" + text[b:]
+    block = f"Measured on {folder.name}.\n\n" + readme_table(runs)
+    new = text[:a] + "\n\n" + block + "\n\n" + text[b:]
     if new == text:
-        return "README.md already matches"
+        return f"README.md already matches {folder.name}"
     README.write_text(new)
-    return "wrote the summary table into README.md"
+    return f"wrote the summary table into README.md, dated {folder.name}. The prose around it is not touched"
 
 
 def report(folder, runs):
@@ -267,10 +273,12 @@ def report(folder, runs):
     return "\n".join(out) + "\n"
 
 
-args = [a for a in sys.argv[1:] if a != "--print"]
-show_only = "--print" in sys.argv[1:]
-if len(args) != 1 or not pathlib.Path(args[0]).is_dir():
-    sys.exit("usage: score.py [--print] ~/.claude/open-steps/evals/<day>")
+flags = [a for a in sys.argv[1:] if a.startswith("--")]
+args = [a for a in sys.argv[1:] if not a.startswith("--")]
+show_only, readme = "--print" in flags, "--readme" in flags
+if (len(args) != 1 or not pathlib.Path(args[0]).is_dir()
+        or set(flags) - {"--print", "--readme"} or (show_only and readme)):
+    sys.exit("usage: score.py [--print | --readme] ~/.claude/open-steps/evals/<day>")
 folder = pathlib.Path(args[0])
 runs = read_day(folder)
 if not runs:
@@ -280,6 +288,8 @@ if not show_only:
     out = HERE / "results.md"
     out.write_text(text)
     print(f"wrote {out}")
-    print(update_readme(runs))
+    # The README is the front page. It changes on --readme only, never as a
+    # side effect of scoring a partial day or a foreign branch.
+    print(update_readme(folder, runs) if readme else "README.md not touched, --readme rewrites its table")
     print()
 print(text)

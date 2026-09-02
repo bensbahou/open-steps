@@ -185,10 +185,12 @@ full on 2026-08-29, the day the seventh skill landed.
 
 <!-- numbers: score.py writes this table, edit the prose but not these rows -->
 
+Measured on 2026-08-29.
+
 | Skill | Haiku 4.5 | Sonnet 5 | Opus 5 |
 |---|---|---|---|
-| `os-check-work` | 9/9 | 9/9 | 9/9 |
 | `os-whats-next` | 9/9 | 9/9 | 9/9 |
+| `os-check-work` | 9/9 | 9/9 | 9/9 |
 | `os-what-could-go-wrong` | 9/9 | 9/9 | 9/9 |
 | `os-ask-simple` | 9/9 | 8/9 | 9/9 |
 | `os-done-or-not` | 9/9 | 7/9 | 9/9 |
