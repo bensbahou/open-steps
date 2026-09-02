@@ -1,12 +1,16 @@
 # Measurements
 
-Real numbers or nothing. Five files: what we ask, what came back, and the two
-scripts in between.
+Real numbers or nothing. Six files: what we ask, who we ask, what came back,
+and the two scripts in between.
 
 - **[`cases.md`](cases.md) is everything we ask.** The phrases that should
   switch a skill on, the off-topic phrases that must switch nothing on, and the
   messy engineer report we use for the quality check. `run.sh` reads this file.
   Change a phrase here and the next run uses it.
+- **[`models.md`](models.md) is who we ask.** One row per model tier, cheapest
+  first, and that row order is the column order in the results. A new tier is
+  one row here, no code. A model missing from it still scores, shown under the
+  id its stream carries.
 - **[`results.md`](results.md) is what came back.** Every skill and every
   phrase, one model next to another. The scorer writes this file and nobody
   types it, which is how you can check the numbers in the main README.
@@ -102,6 +106,10 @@ the pass that ran last, not the one you liked best.
 
 We found all three by running it, not by reading about it.
 
+- **`fixtures/` holds hand-made streams, not measurements.** One small folder
+  per shape the scorer must handle, short enough to read. They exist to show
+  the scorer failing and then passing on a shape that bit once; nothing in
+  them was said by a model, and they never feed `results.md`.
 - `claude -p --bare` skips the login on purpose and cannot sign in.
 - Pointing the tool at an empty home folder signs it out too.
 - macOS ships an old bash, version 3.2. In that version one empty list in the
